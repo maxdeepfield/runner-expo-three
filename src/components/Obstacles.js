@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import { WORLD_TREE_COLORS } from '../constants/treePalette';
 
 const OBSTACLE_LANES = [-2.5, 0, 2.5]; // Left, Center, Right
 const OBSTACLE_SPACING = 15;
@@ -38,29 +39,22 @@ function Obstacle({ position, onCollision, onPass, playerPosition, gameStarted }
     }
   });
 
-  // Pastel colors for obstacles - fixed colors, no blinking
-  const pastelColors = [
-    "#FFB3BA", // Pastel red
-    "#FFDFBA", // Pastel orange
-    "#FFFFBA", // Pastel yellow
-    "#BAFFC9", // Pastel green
-    "#BAE1FF", // Pastel blue
-    "#E1BAFF", // Pastel purple
-  ];
-
-  // Select a random pastel color for this obstacle (fixed, not blinking)
-  const [randomColor] = useState(pastelColors[Math.floor(Math.random() * pastelColors.length)]);
+  const [treeColor] = useState(WORLD_TREE_COLORS[Math.floor(Math.random() * WORLD_TREE_COLORS.length)]);
 
   return (
     <group ref={groupRef} position={position}>
-      {/* Simple cube obstacle with fixed pastel color */}
-      <mesh castShadow>
-        <boxGeometry args={[1.5, 1.5, 1.5]} />
-        <meshStandardMaterial color={randomColor} />
-      </mesh>
-    </group>
-  );
-}
+      {/* Tree-shaped obstacle */}
+        <mesh position={[0, 1, 0]} castShadow>
+          <cylinderGeometry args={[0.3, 0.5, 2]} />
+          <meshStandardMaterial color="#8B4513" />
+        </mesh>
+        <mesh position={[0, 3, 0]} castShadow>
+          <coneGeometry args={[1.5, 3]} />
+          <meshStandardMaterial color={treeColor} />
+        </mesh>
+      </group>
+    );
+  }
 
 export default function Obstacles({ speed, onCollision, onPass, playerPosition, gameStarted = true }) {
   const [obstacles, setObstacles] = useState([]);
@@ -125,7 +119,7 @@ export default function Obstacles({ speed, onCollision, onPass, playerPosition, 
       {obstacles.map(obstacle => (
         <Obstacle
           key={obstacle.id}
-          position={[obstacle.lane, 0.75, obstacle.z]}
+          position={[obstacle.lane, 0, obstacle.z]}
           onCollision={onCollision}
           onPass={onPass}
           playerPosition={playerPosition}
@@ -135,4 +129,3 @@ export default function Obstacles({ speed, onCollision, onPass, playerPosition, 
     </>
   );
 }
-

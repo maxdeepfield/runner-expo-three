@@ -11,6 +11,7 @@ export default function Game({ controls = { left: false, right: false }, onScore
     score: 0,
     gameOver: false,
     speed: 0.1,
+    paused: false,
   });
 
   const [playerPosition, setPlayerPosition] = useState(new THREE.Vector3(0, 1, 0));
@@ -26,14 +27,28 @@ export default function Game({ controls = { left: false, right: false }, onScore
       score: 0,
       gameOver: false,
       speed: 0.1,
+      paused: false,
     });
     setPlayerPosition(new THREE.Vector3(0, 1, 0));
     setGameStarted(false);
     startDelayRef.current = 0;
   }, []);
 
+  // Handle visibility change (tab focus/blur)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      setGameState(prev => ({
+        ...prev,
+        paused: document.hidden,
+      }));
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
+
   useFrame((state, delta) => {
-    if (gameState.gameOver) return;
+    if (gameState.gameOver || gameState.paused) return;
 
     // Small delay before starting collision detection to ensure everything is initialized
     startDelayRef.current += delta;
@@ -69,8 +84,8 @@ export default function Game({ controls = { left: false, right: false }, onScore
 
     // Increase speed over time and update score
     setGameState(prev => {
-      // Only update score and speed if game is not over
-      if (prev.gameOver) {
+      // Only update score and speed if game is not over or paused
+      if (prev.gameOver || prev.paused) {
         return prev;
       }
 
@@ -105,14 +120,14 @@ export default function Game({ controls = { left: false, right: false }, onScore
         position={[10, 20, 5]}
         intensity={2.5} // Further increased sun intensity
         castShadow
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
-        shadow-camera-far={100}
-        shadow-camera-left={-20}
-        shadow-camera-right={20}
-        shadow-camera-top={20}
-        shadow-camera-bottom={-20}
-        shadow-bias={-0.0001}
+        shadow-mapSize-width={4096}
+        shadow-mapSize-height={4096}
+        shadow-camera-far={150}
+        shadow-camera-left={-30}
+        shadow-camera-right={30}
+        shadow-camera-top={30}
+        shadow-camera-bottom={-30}
+        shadow-bias={-0.0005}
       />
       <pointLight position={[-10, 10, -10]} intensity={0.7} />
       <pointLight position={[10, 10, -5]} intensity={0.5} /> {/* Additional light for better illumination */}
@@ -132,14 +147,14 @@ export default function Game({ controls = { left: false, right: false }, onScore
         onCollision={handleGameOver}
         onPass={handleObstaclePass}
         playerPosition={playerPosition}
-        gameStarted={gameStarted && !gameState.gameOver} // Stop obstacles when game is over
+        gameStarted={gameStarted && !gameState.gameOver && !gameState.paused}
       />
 
       <Coins
         speed={gameState.speed}
         onCollect={handleCoinCollect}
         playerPosition={playerPosition}
-        gameStarted={gameStarted && !gameState.gameOver} // Stop coins when game is over
+        gameStarted={gameStarted && !gameState.gameOver && !gameState.paused}
       />
 
     </>
