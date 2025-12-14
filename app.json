@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "3D Runner Game",
-    "slug": "runner-expo-three",
+    "name": "Absolute Tree Freakout",
+    "slug": "absolute-tree-freakout",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

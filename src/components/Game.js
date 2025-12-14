@@ -114,25 +114,7 @@ export default function Game({ controls = { left: false, right: false }, onScore
 
   return (
     <>
-      {/* Sky gradient - WHITE at bottom to BLUE at top, faster transition near horizon */}
-      {Array.from({ length: 30 }, (_, i) => {
-        const t = i / 29; // 0 to 1
-        // Use power curve for faster transition at bottom (horizon)
-        const tCurved = Math.pow(t, 0.4); // Lower = faster transition near horizon
-        // Interpolate from white (255,255,255) to sky blue (135,206,235)
-        const r = Math.round(255 - tCurved * (255 - 135));
-        const g = Math.round(255 - tCurved * (255 - 206));
-        const b = Math.round(255 - tCurved * (255 - 235));
-        const color = `rgb(${r},${g},${b})`;
-        const bandHeight = 20;
-        const y = i * bandHeight + 5; // Offset up to match road visibility line
-        return (
-          <mesh key={`sky-${i}`} position={[playerPosition.x, y, playerPosition.z - 800]} rotation={[0, 0, 0]}>
-            <planeGeometry args={[2000, bandHeight + 1]} />
-            <meshBasicMaterial color={color} side={THREE.DoubleSide} />
-          </mesh>
-        );
-      })}
+
 
       {/* Snow/ground plane extending to horizon */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[playerPosition.x, -0.1, playerPosition.z - 500]}>
@@ -144,8 +126,7 @@ export default function Game({ controls = { left: false, right: false }, onScore
       <ambientLight intensity={0.8} />
       <directionalLight position={[10, 20, 5]} intensity={2.0} />
 
-      {/* Fog for depth - blue tinted, more transparent */}
-      <fog attach="fog" args={['#a8d4ea', 200, 800]} />
+
 
       <Player
         ref={playerRef}

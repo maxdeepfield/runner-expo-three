@@ -135,7 +135,7 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#87CEEB',
+    backgroundColor: '#5BA3C6',
   },
   scoreContainer: {
     position: 'absolute',
