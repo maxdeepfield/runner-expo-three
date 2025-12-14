@@ -15,12 +15,31 @@ export default function App() {
 
   // Handle touch start
   const handleTouchStart = (e) => {
+    // Don't prevent default when game is over (allow tap to restart)
+    if (gameOver) return;
+    
+    // Prevent default to stop browser navigation gestures (Telegram, etc.)
+    if (e.preventDefault) e.preventDefault();
+    if (e.stopPropagation) e.stopPropagation();
+    
     const touch = e.touches ? e.touches[0] : e;
     setStartX(touch.clientX || touch.pageX);
   };
 
+  // Handle touch move - prevent scrolling/navigation
+  const handleTouchMove = (e) => {
+    if (gameOver) return;
+    if (e.preventDefault) e.preventDefault();
+    if (e.stopPropagation) e.stopPropagation();
+  };
+
   // Handle touch end
   const handleTouchEnd = (e) => {
+    if (gameOver) return;
+    
+    if (e.preventDefault) e.preventDefault();
+    if (e.stopPropagation) e.stopPropagation();
+    
     const touch = e.changedTouches ? e.changedTouches[0] : e;
     const endX = touch.clientX || touch.pageX;
     const diff = startX - endX;
@@ -48,10 +67,27 @@ export default function App() {
     setGameKey(prev => prev + '-restart'); // Change key to force remount
   };
 
+  // Prevent browser gestures on mount
+  React.useEffect(() => {
+    // Prevent pull-to-refresh and swipe navigation
+    document.body.style.overscrollBehavior = 'none';
+    document.body.style.touchAction = 'none';
+    document.documentElement.style.overscrollBehavior = 'none';
+    document.documentElement.style.touchAction = 'none';
+    
+    return () => {
+      document.body.style.overscrollBehavior = '';
+      document.body.style.touchAction = '';
+      document.documentElement.style.overscrollBehavior = '';
+      document.documentElement.style.touchAction = '';
+    };
+  }, []);
+
   return (
     <View
       style={styles.container}
       onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
       onMouseDown={handleTouchStart}
       onMouseUp={handleTouchEnd}
@@ -59,8 +95,7 @@ export default function App() {
       <StatusBar barStyle="light-content" />
       <Canvas
         camera={{ position: [0, 5, 10], fov: 75 }}
-        gl={{ antialias: true, shadowMap: true }}
-        shadows
+        gl={{ antialias: false }}
       >
         <Game
           key={gameKey}
@@ -76,7 +111,7 @@ export default function App() {
       {/* Score display */}
       {!gameOver && (
         <View style={styles.scoreContainer}>
-          <Text style={styles.scoreText}>Score: {Math.floor(score)}</Text>
+          <Text style={styles.scoreText}>{Math.floor(score)}</Text>
         </View>
       )}
 
@@ -86,10 +121,11 @@ export default function App() {
           style={styles.gameOverContainer}
           onStartShouldSetResponder={() => true}
           onResponderRelease={restartGame}
+          onTouchEnd={restartGame}
+          onClick={restartGame}
         >
           <Text style={styles.gameOverText}>GAME OVER</Text>
-          <Text style={styles.finalScoreText}>Final Score: {Math.floor(finalScore)}</Text>
-          <Text style={styles.restartText}>Tap to Restart</Text>
+          <Text style={styles.finalScoreText}>{Math.floor(finalScore)}</Text>
         </View>
       )}
     </View>
@@ -104,17 +140,14 @@ const styles = StyleSheet.create({
   scoreContainer: {
     position: 'absolute',
     top: 50,
-    left: 20,
-    right: 20,
-    alignItems: 'flex-start',
+    left: 0,
+    right: 0,
+    alignItems: 'center',
   },
   scoreText: {
-    color: 'white',
-    fontSize: 24,
+    color: '#333333',
+    fontSize: 64,
     fontWeight: 'bold',
-    textShadowColor: 'rgba(0, 0, 0, 0.75)',
-    textShadowOffset: { width: 2, height: 2 },
-    textShadowRadius: 4,
   },
   gameOverContainer: {
     position: 'absolute',
@@ -127,23 +160,15 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.8)', // More transparent bright white overlay
   },
   gameOverText: {
-    color: '#FF6B6B', // Reddish color that works well on bright background
-    fontSize: 48,
+    color: '#FF6B6B',
+    fontSize: 64,
     fontWeight: 'bold',
     marginBottom: 20,
     // Removed text shadows for a cleaner look
   },
   finalScoreText: {
-    color: '#333333', // Dark gray for better contrast on bright background
-    fontSize: 24,
+    color: '#333333',
+    fontSize: 64,
     fontWeight: 'bold',
-    marginBottom: 30,
-    // Removed text shadows for a cleaner look
-  },
-  restartText: {
-    color: '#666666', // Medium gray for subtle appearance
-    fontSize: 18,
-    fontStyle: 'italic',
-    // Removed text shadows for a cleaner look
   },
 });

@@ -56,32 +56,32 @@ export default function Track({ speed, playerPosition }) {
     <>
       {segments.map(seg => (
         <group key={seg.id} position={[0, 0, seg.z]}>
-          {/* Road - centered on segment position */}
-          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, -trackLength / 2]} castShadow receiveShadow>
+          {/* Road */}
+          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, -trackLength / 2]}>
             <planeGeometry args={[trackWidth, trackLength]} />
             <primitive object={roadMaterial} />
           </mesh>
 
           {/* Lane markings */}
-          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, -trackLength / 2]} castShadow receiveShadow>
+          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, -trackLength / 2]}>
             <planeGeometry args={[0.1, trackLength]} />
-            <meshStandardMaterial color="#ffff00" />
+            <meshBasicMaterial color="#ffff00" />
           </mesh>
-          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-trackWidth / 3, 0.01, -trackLength / 2]} castShadow receiveShadow>
+          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-trackWidth / 3, 0.01, -trackLength / 2]}>
             <planeGeometry args={[0.05, trackLength]} />
-            <meshStandardMaterial color="#ffffff" />
+            <meshBasicMaterial color="#ffffff" />
           </mesh>
-          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[trackWidth / 3, 0.01, -trackLength / 2]} castShadow receiveShadow>
+          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[trackWidth / 3, 0.01, -trackLength / 2]}>
             <planeGeometry args={[0.05, trackLength]} />
-            <meshStandardMaterial color="#ffffff" />
+            <meshBasicMaterial color="#ffffff" />
           </mesh>
 
           {/* Grass on sides */}
-          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-trackWidth / 2 - 10, -0.01, -trackLength / 2]} castShadow receiveShadow>
+          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-trackWidth / 2 - 10, -0.01, -trackLength / 2]}>
             <planeGeometry args={[20, trackLength]} />
             <meshStandardMaterial color="#4a7c59" />
           </mesh>
-          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[trackWidth / 2 + 10, -0.01, -trackLength / 2]} castShadow receiveShadow>
+          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[trackWidth / 2 + 10, -0.01, -trackLength / 2]}>
             <planeGeometry args={[20, trackLength]} />
             <meshStandardMaterial color="#4a7c59" />
           </mesh>
@@ -92,16 +92,16 @@ export default function Track({ speed, playerPosition }) {
         <group
           key={tree.id}
           position={[
-            tree.side === 'left' ? -trackWidth / 2 - 5 : trackWidth / 2 + 5,
+            tree.side === 'left' ? -trackWidth / 2 - 8 : trackWidth / 2 + 8,
             0,
             tree.z
           ]}
         >
-          <mesh position={[0, 1, 0]} castShadow receiveShadow>
+          <mesh position={[0, 1, 0]}>
             <cylinderGeometry args={[0.3, 0.5, 2]} />
             <meshStandardMaterial color="#8B4513" />
           </mesh>
-          <mesh position={[0, 3, 0]} castShadow receiveShadow>
+          <mesh position={[0, 3, 0]}>
             <coneGeometry args={[1.5, 3]} />
             <meshStandardMaterial color={tree.color} />
           </mesh>

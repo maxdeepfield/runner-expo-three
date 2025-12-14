@@ -105,32 +105,47 @@ export default function Game({ controls = { left: false, right: false }, onScore
   };
 
   const handleObstaclePass = () => {
-    setGameState(prev => ({ ...prev, score: prev.score + 100 }));
+    // No points for passing obstacles
   };
 
   const handleCoinCollect = () => {
-    setGameState(prev => ({ ...prev, score: prev.score + 50 }));
+    setGameState(prev => ({ ...prev, score: prev.score + 100 }));
   };
 
   return (
     <>
-      {/* Enhanced Lighting for Brighter Scene */}
-      <ambientLight intensity={0.6} />
-      <directionalLight
-        position={[10, 20, 5]}
-        intensity={2.5} // Further increased sun intensity
-        castShadow
-        shadow-mapSize-width={4096}
-        shadow-mapSize-height={4096}
-        shadow-camera-far={150}
-        shadow-camera-left={-30}
-        shadow-camera-right={30}
-        shadow-camera-top={30}
-        shadow-camera-bottom={-30}
-        shadow-bias={-0.0005}
-      />
-      <pointLight position={[-10, 10, -10]} intensity={0.7} />
-      <pointLight position={[10, 10, -5]} intensity={0.5} /> {/* Additional light for better illumination */}
+      {/* Sky gradient - WHITE at bottom to BLUE at top, faster transition near horizon */}
+      {Array.from({ length: 30 }, (_, i) => {
+        const t = i / 29; // 0 to 1
+        // Use power curve for faster transition at bottom (horizon)
+        const tCurved = Math.pow(t, 0.4); // Lower = faster transition near horizon
+        // Interpolate from white (255,255,255) to sky blue (135,206,235)
+        const r = Math.round(255 - tCurved * (255 - 135));
+        const g = Math.round(255 - tCurved * (255 - 206));
+        const b = Math.round(255 - tCurved * (255 - 235));
+        const color = `rgb(${r},${g},${b})`;
+        const bandHeight = 20;
+        const y = i * bandHeight + 5; // Offset up to match road visibility line
+        return (
+          <mesh key={`sky-${i}`} position={[playerPosition.x, y, playerPosition.z - 800]} rotation={[0, 0, 0]}>
+            <planeGeometry args={[2000, bandHeight + 1]} />
+            <meshBasicMaterial color={color} side={THREE.DoubleSide} />
+          </mesh>
+        );
+      })}
+
+      {/* Snow/ground plane extending to horizon */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[playerPosition.x, -0.1, playerPosition.z - 500]}>
+        <planeGeometry args={[2000, 1500]} />
+        <meshStandardMaterial color="#f0f5f5" />
+      </mesh>
+
+      {/* Lighting - no shadows for better mobile performance */}
+      <ambientLight intensity={0.8} />
+      <directionalLight position={[10, 20, 5]} intensity={2.0} />
+
+      {/* Fog for depth - blue tinted, more transparent */}
+      <fog attach="fog" args={['#a8d4ea', 200, 800]} />
 
       <Player
         ref={playerRef}

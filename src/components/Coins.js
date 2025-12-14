@@ -7,11 +7,21 @@ const COIN_SPACING = 10;
 const COIN_COUNT = 15;
 const SEGMENTS_AHEAD = 5; // Keep 5 segments ahead
 
-function Coin({ position, onCollect, playerPosition, gameStarted }) {
+function Coin({ position, onCollect, playerPosition, gameStarted, collected }) {
     const groupRef = useRef();
     const hasBeenCollectedRef = useRef(false);
     const rotationRef = useRef(0);
     const bobOffsetRef = useRef(Math.random() * Math.PI * 2); // Random start position for bobbing
+
+    // Reset collected state when coin is respawned (collected prop changes to false)
+    useEffect(() => {
+        if (!collected) {
+            hasBeenCollectedRef.current = false;
+            if (groupRef.current) {
+                groupRef.current.visible = true;
+            }
+        }
+    }, [collected, position[2]]); // Reset when z position changes significantly (respawn)
 
     useFrame((state, delta) => {
         if (!groupRef.current || !playerPosition || !gameStarted || hasBeenCollectedRef.current) return;
@@ -45,14 +55,12 @@ function Coin({ position, onCollect, playerPosition, gameStarted }) {
     return (
         <group ref={groupRef} position={[position[0], position[1], position[2]]}>
             {/* Bright gold coin with vertical orientation */}
-            <mesh castShadow rotation={[Math.PI / 2, 0, 0]}> {/* Rotate 90 degrees to stand vertically */}
-                <cylinderGeometry args={[0.5, 0.5, 0.1, 32]} /> {/* Thinner coin */}
+            <mesh rotation={[Math.PI / 2, 0, 0]}>
+                <cylinderGeometry args={[0.5, 0.5, 0.1, 16]} />
                 <meshStandardMaterial
-                    color="#FFEA00" // Brighter gold
-                    emissive="#FFD700" // Add glow
-                    emissiveIntensity={0.2}
-                    metalness={0.9}
-                    roughness={0.1}
+                    color="#FFEA00"
+                    emissive="#FFD700"
+                    emissiveIntensity={0.3}
                 />
             </mesh>
         </group>
@@ -74,10 +82,18 @@ export default function Coins({ speed, onCollect, playerPosition, gameStarted = 
                 id: `coin-${i}`,
                 lane,
                 z: startZ - i * COIN_SPACING,
+                collected: false,
             });
         }
         setCoins(initialCoins);
     }, []);
+
+    const handleCoinCollect = (coinId) => {
+        setCoins(prev => prev.map(coin => 
+            coin.id === coinId ? { ...coin, collected: true } : coin
+        ));
+        onCollect();
+    };
 
     useFrame(() => {
         if (!playerPosition) return;
@@ -86,20 +102,20 @@ export default function Coins({ speed, onCollect, playerPosition, gameStarted = 
         setCoins(prev => {
             const playerZ = playerPosition.z;
             const furthestAheadZ = Math.min(...prev.map(c => c.z));
-            const segmentsAhead = Math.floor((playerZ - furthestAheadZ) / COIN_SPACING);
 
             return prev.map(coin => {
                 const newZ = coin.z + speed;
 
-                // Reset coin when it passes player or maintain segments ahead
-                if (newZ > playerZ + 5 || segmentsAhead < SEGMENTS_AHEAD) {
+                // Reset coin when it passes player
+                if (newZ > playerZ + 5) {
                     const lane = COIN_LANES[Math.floor(Math.random() * COIN_LANES.length)];
-                    // Place new coin ahead of the furthest one to maintain segments ahead
-                    const newZPosition = furthestAheadZ - COIN_SPACING;
+                    // Place new coin ahead of the furthest one
+                    const newZPosition = furthestAheadZ - COIN_SPACING - Math.random() * COIN_SPACING;
                     return {
                         ...coin,
                         lane,
                         z: newZPosition,
+                        collected: false, // Reset collected state
                     };
                 }
 
@@ -114,9 +130,10 @@ export default function Coins({ speed, onCollect, playerPosition, gameStarted = 
                 <Coin
                     key={coin.id}
                     position={[coin.lane, 1.5, coin.z]}
-                    onCollect={onCollect}
+                    onCollect={() => handleCoinCollect(coin.id)}
                     playerPosition={playerPosition}
                     gameStarted={gameStarted}
+                    collected={coin.collected}
                 />
             ))}
         </>

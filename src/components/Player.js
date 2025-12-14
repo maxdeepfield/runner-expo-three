@@ -72,16 +72,16 @@ const Player = forwardRef(({ position, speed, onGameOver, controls = { left: fal
 
   return (
     <group ref={groupRef} position={position}>
-      <mesh ref={meshRef} castShadow>
+      <mesh ref={meshRef}>
         <boxGeometry args={[0.8, 1.5, 0.8]} />
         <meshStandardMaterial color="#ff6b6b" />
       </mesh>
       {/* Eyes */}
-      <mesh position={[0.2, 0.3, 0.4]} castShadow>
+      <mesh position={[0.2, 0.3, 0.4]}>
         <sphereGeometry args={[0.1, 8, 8]} />
         <meshStandardMaterial color="white" />
       </mesh>
-      <mesh position={[-0.2, 0.3, 0.4]} castShadow>
+      <mesh position={[-0.2, 0.3, 0.4]}>
         <sphereGeometry args={[0.1, 8, 8]} />
         <meshStandardMaterial color="white" />
       </mesh>

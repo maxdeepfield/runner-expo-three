@@ -44,16 +44,16 @@ function Obstacle({ position, onCollision, onPass, playerPosition, gameStarted }
   return (
     <group ref={groupRef} position={position}>
       {/* Tree-shaped obstacle */}
-        <mesh position={[0, 1, 0]} castShadow>
-          <cylinderGeometry args={[0.3, 0.5, 2]} />
-          <meshStandardMaterial color="#8B4513" />
-        </mesh>
-        <mesh position={[0, 3, 0]} castShadow>
-          <coneGeometry args={[1.5, 3]} />
-          <meshStandardMaterial color={treeColor} />
-        </mesh>
-      </group>
-    );
+      <mesh position={[0, 1, 0]}>
+        <cylinderGeometry args={[0.3, 0.5, 2]} />
+        <meshStandardMaterial color="#8B4513" />
+      </mesh>
+      <mesh position={[0, 3, 0]}>
+        <coneGeometry args={[1.5, 3]} />
+        <meshStandardMaterial color={treeColor} />
+      </mesh>
+    </group>
+  );
   }
 
 export default function Obstacles({ speed, onCollision, onPass, playerPosition, gameStarted = true }) {
